@@ -17,8 +17,10 @@ NDI.NTree.prototype = {
 		if ( this._config.collisionTest( this._aabb, item ) ) {
 			if ( this._children ) {
 				var collided = [];
-				for ( var i = 0; i < this._children.length and collided.length < 2; i++ ) {
-					collided.push( this._children[i] );
+				for ( var i = 0; i < this._children.length && collided.length < 2; i++ ) {
+					if ( this._config.collisionTest( this._children[i]._aabb, item ) ) {
+						collided.push( this._children[i] );
+					}
 				}
 
 				if ( collided.length === 1 ) {
@@ -26,16 +28,16 @@ NDI.NTree.prototype = {
 				} else {
 					this._items.push( item );
 				}
-
-				if 
 			} else {
 				if ( this._items.length >= this._config.maxCapacity ) {
+					this._children = [];
 					this.split( new NDI.AABBND().copy(this._aabb), 0 );
-					for ( var j = 0; j < this._items.length; j++ ) {
-						this.add( this._items[i] );
+					var itemsCopy = this._items.slice( 0 );
+					this._items = [];
+					for ( var j = 0; j < itemsCopy.length; j++ ) {
+						this.add( itemsCopy[j] );
 					}
 					this.add( item );
-					this._items = [];
 				} else {
 					this._items.push( item );
 				}

@@ -21,7 +21,7 @@ NDI.VectorND.prototype = {
 
 	set: function () {
 
-		this.coords = arguments.slice(0);
+		this.coords = Array.prototype.slice.call(arguments);
 		return this;
 
 	},
@@ -57,7 +57,7 @@ NDI.VectorND.prototype = {
 
 	add: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			this.coords[i] += v.coords[i];
 		}
@@ -78,7 +78,7 @@ NDI.VectorND.prototype = {
 
 	sub: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			this.coords[i] -= v.coords[i];
 		}
@@ -89,7 +89,7 @@ NDI.VectorND.prototype = {
 
 	multiply: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			this.coords[i] *= v.coords[i];
 		}
@@ -110,7 +110,7 @@ NDI.VectorND.prototype = {
 
 	divide: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			divider = v.coords[i];
 			this.coords[i] = divider === 0 ? (this.coords[i] / divider) : 0;
@@ -142,7 +142,7 @@ NDI.VectorND.prototype = {
 
 	min: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			if ( this.coords[i] > v.coords[i] ) {
 				this.coords[i] = v.coords[i];
@@ -155,7 +155,7 @@ NDI.VectorND.prototype = {
 
 	max: function ( v ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			if ( this.coords[i] < v.coords[i] ) {
 				this.coords[i] = v.coords[i];
@@ -168,7 +168,7 @@ NDI.VectorND.prototype = {
 
 	clamp: function ( min, max ) {
 
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			if ( this.coords[i] < min.coords[i] ) {
 				this.coords[i] = min.coords[i];
@@ -190,10 +190,12 @@ NDI.VectorND.prototype = {
 	dot: function ( v ) {
 
 		result = 0;
-		var length = math.min(this.coords.length, v.coords.length);
+		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			result += this.coords[i] * v.coords[i];
 		}
+
+		return result;
 
 	},
 

@@ -1,7 +1,7 @@
-NDI.AABBND = function () {
+NDI.AABBND = function ( min, max ) {
 
-	this.min = new NDI.VectorND();
-	this.max = new NDI.VectorND();
+	this.min = min || new NDI.VectorND();
+	this.max = max || new NDI.VectorND();
 
 };
 
@@ -84,7 +84,7 @@ NDI.AABBND.prototype = {
 	containsPoint: function ( point ) {
 
 		for ( var i = 0; i < this.min.getN(); i++ ) {
-			if ( point.coords[i] < this.min.coords[i] || point.coords[i] > this.min.coords[i] ) {
+			if ( point.coords[i] < this.min.coords[i] || point.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
 		}

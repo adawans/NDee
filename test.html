@@ -1,0 +1,57 @@
+<html>
+	<head>
+		<script src="src/NDI.js"></script>
+		<script src="src/geom/VectorND.js"></script>
+		<script src="src/geom/AABBND.js"></script>
+		<script src="src/index/NTree.js"></script>
+	</head>
+
+	<body>
+		<script type="text/javascript">
+			var aabb = new NDI.AABBND( new NDI.VectorND( 0, 0 ),  new NDI.VectorND( 10, 10 ) );
+			var config = {
+				"maxCapacity": 3,
+				"collisionTest": function ( aabb, v ) {
+					return aabb.containsPoint( v );
+				}
+			};
+			var tree = new NDI.NTree( aabb, config );
+
+			var points = [];
+
+			for ( var i = 0; i < 1000; i++ ) {
+				var vect = new NDI.VectorND( Math.random()*10, Math.random()*10 );
+				tree.add( vect );
+				points.push( vect );
+			}
+
+
+			var queryBounds = new NDI.AABBND( new NDI.VectorND( 2.5, 5 ),  new NDI.VectorND( 3, 6.5 ) );
+			var query = {
+				"collides": function ( aabb ) {
+					return aabb.isIntersectionBox( queryBounds );
+				},
+				"results": [],
+				"addResults": function ( results ) {
+					for ( var i = 0; i < results.length; i++ ) {
+						if ( queryBounds.containsPoint( results[i] ) ) {
+							this.results.push( results[i] );
+						}
+					}
+				}
+			};
+
+			tree.queryCollision( query );
+
+			for ( var i = 0; i < query.results.length; i++ ) {
+				console.log("retrieved ", query.results[i].coords );
+			}
+
+			for ( var i = 0; i < points.length; i++ ) {
+				if ( queryBounds.containsPoint( points[i] ) ) {
+					console.log("known ", points[i].coords );
+				}
+			}
+		</script>
+	</body>	
+</html>
