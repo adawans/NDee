@@ -168,7 +168,7 @@ NDI.VectorND.prototype = {
 
 	clamp: function ( min, max ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
+		var length = Math.min( this.coords.length, Math.min( min.coords.length, max.coords.length ) );
 		for ( var i = 0; i < length; i++ ) {
 			if ( this.coords[i] < min.coords[i] ) {
 				this.coords[i] = min.coords[i];

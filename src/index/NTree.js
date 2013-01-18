@@ -15,32 +15,38 @@ NDI.NTree.prototype = {
 	add: function ( item ) {
 
 		if ( this._config.collisionTest( this._aabb, item ) ) {
-			if ( this._children ) {
-				var collided = [];
-				for ( var i = 0; i < this._children.length && collided.length < 2; i++ ) {
-					if ( this._config.collisionTest( this._children[i]._aabb, item ) ) {
-						collided.push( this._children[i] );
-					}
-				}
+			this._add( item );
+		}
 
-				if ( collided.length === 1 ) {
-					collided[0].add( item );
-				} else {
-					this._items.push( item );
+	},
+
+	_add: function ( item ) {
+
+		if ( this._children ) {
+			var collided = [];
+			for ( var i = 0; i < this._children.length && collided.length < 2; i++ ) {
+				if ( this._config.collisionTest( this._children[i]._aabb, item ) ) {
+					collided.push( this._children[i] );
 				}
+			}
+
+			if ( collided.length === 1 ) {
+				collided[0]._add( item );
 			} else {
-				if ( this._items.length >= this._config.maxCapacity ) {
-					this._children = [];
-					this.split( new NDI.AABBND().copy(this._aabb), 0 );
-					var itemsCopy = this._items.slice( 0 );
-					this._items = [];
-					for ( var j = 0; j < itemsCopy.length; j++ ) {
-						this.add( itemsCopy[j] );
-					}
-					this.add( item );
-				} else {
-					this._items.push( item );
+				this._items.push( item );
+			}
+		} else {
+			if ( this._items.length >= this._config.maxCapacity ) {
+				this._children = [];
+				this.split( new NDI.AABBND().copy(this._aabb), 0 );
+				var itemsCopy = this._items.slice( 0 );
+				this._items = [];
+				for ( var j = 0; j < itemsCopy.length; j++ ) {
+					this._add( itemsCopy[j] );
 				}
+				this._add( item );
+			} else {
+				this._items.push( item );
 			}
 		}
 
@@ -102,7 +108,7 @@ NDI.NTree.prototype = {
 				for ( var i = 0; i < this._children.length; i++ ) {
 					var weighed = {};
 					weighed.child = this._children[i];
-					weighed.distance = this._children[i].aabb.distanceToPoint( query.point );
+					weighed.distance = this._children[i]._aabb.distanceToPoint( query.point );
 					sorted.push( weighed );
 				}
 

@@ -8,7 +8,9 @@
 
 	<body>
 		<script type="text/javascript">
-			var aabb = new NDI.AABBND( new NDI.VectorND( 0, 0 ),  new NDI.VectorND( 10, 10 ) );
+
+			//Initializing the octree
+			var aabb = new NDI.AABBND( new NDI.VectorND( 0, 0, 0 ),  new NDI.VectorND( 10, 10, 10 ) );
 			var config = {
 				"maxCapacity": 3,
 				"collisionTest": function ( aabb, v ) {
@@ -17,16 +19,19 @@
 			};
 			var tree = new NDI.NTree( aabb, config );
 
+
+			//Dummy points population
 			var points = [];
 
-			for ( var i = 0; i < 1000; i++ ) {
-				var vect = new NDI.VectorND( Math.random()*10, Math.random()*10 );
+			for ( var i = 0; i < 1000000; i++ ) {
+				var vect = new NDI.VectorND( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
 			}
 
 
-			var queryBounds = new NDI.AABBND( new NDI.VectorND( 2.5, 5 ),  new NDI.VectorND( 3, 6.5 ) );
+			//Collision query
+			var queryBounds = new NDI.AABBND( new NDI.VectorND( 2.5, 5, 6 ),  new NDI.VectorND( 2.6, 6, 7 ) );
 			var query = {
 				"collides": function ( aabb ) {
 					return aabb.isIntersectionBox( queryBounds );
@@ -41,17 +46,62 @@
 				}
 			};
 
+			console.time("Tree collision");
 			tree.queryCollision( query );
+			console.timeEnd("Tree collision");
 
-			for ( var i = 0; i < query.results.length; i++ ) {
-				console.log("retrieved ", query.results[i].coords );
-			}
 
+			//Checking collision query results
+
+			console.time("Brute collision");
+			var bfResults = [];
 			for ( var i = 0; i < points.length; i++ ) {
 				if ( queryBounds.containsPoint( points[i] ) ) {
-					console.log("known ", points[i].coords );
+					bfResults.push( points[i] );
 				}
 			}
+			console.timeEnd("Brute collision");
+
+			for ( var i = 0; i < query.results.length; i++ ) {
+				console.log("COLLISION QUERY ", query.results[i].coords );
+			}
+
+			console.log("");
+
+			for ( var i = 0; i < bfResults.length; i++ ) {
+				console.log("BRUTE FORCE ", bfResults[i].coords );
+			}
+
+			
+			//Nearest neightbor query 
+			var nnQuery = {
+				"point": new NDI.VectorND( 3, 2, 1 ),
+				"distanceTo": function ( v ) {
+					return this.point.distanceTo( v );
+				},
+			};
+
+			console.time("Tree NN");
+			tree.queryNearest( nnQuery );
+			console.timeEnd("Tree NN");
+
+
+			//Checking nearest neighbor query
+			console.time("Brute NN");
+			var bestNN = null;
+			var bestNNDist = Infinity;
+			for ( var i = 0; i < points.length; i++ ) {
+				var dist = points[i].distanceTo( nnQuery.point );
+				if ( dist < bestNNDist ) {
+					bestNN = points[i];
+					bestNNDist = dist;
+				}
+			}
+			console.timeEnd("Brute NN");
+
+			console.log("");
+			console.log("NN QUERY ", nnQuery.nearest.coords );
+			console.log("BRUTE FORCE ", bestNN.coords );
 		</script>
 	</body>	
 </html>
