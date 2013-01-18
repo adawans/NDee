@@ -1,11 +1,10 @@
-NDI.NTree = function ( aabb, parent, maxCapacity, collides ) {
+NDI.NTree = function ( aabb, config, parent ) {
 
-	this.aabb = aabb;
-	this.parent = parent;
-	this.maxCapacity = maxCapacity;
-	this.collides = collides;
-	this.items = [];
-	this.children = null;
+	this._aabb = aabb;
+	this._parent = parent;
+	this._items = [];
+	this._children = null;
+	this._config = config;
 };
 
 
@@ -15,21 +14,30 @@ NDI.NTree.prototype = {
 
 	add: function ( item ) {
 
-		if ( this.collides( this.aabb, item ) ) {
-			if ( this.children ) {
-				for ( var i = 0; i < this.children.length; i++ ) {
-					this.children[i].add( item );
+		if ( this._config.collisionTest( this._aabb, item ) ) {
+			if ( this._children ) {
+				var collided = [];
+				for ( var i = 0; i < this._children.length and collided.length < 2; i++ ) {
+					collided.push( this._children[i] );
 				}
+
+				if ( collided.length === 1 ) {
+					collided[0].add( item );
+				} else {
+					this._items.push( item );
+				}
+
+				if 
 			} else {
-				if ( this.items.length >= this.maxCapacity ) {
-					this.split( new NDI.AABBND().copy(this.aabb), 0 );
-					for ( var j = 0; j < this.items.length; j++ ) {
-						this.add( this.items[i] );
+				if ( this._items.length >= this._config.maxCapacity ) {
+					this.split( new NDI.AABBND().copy(this._aabb), 0 );
+					for ( var j = 0; j < this._items.length; j++ ) {
+						this.add( this._items[i] );
 					}
 					this.add( item );
-					this.items = [];
+					this._items = [];
 				} else {
-					this.items.push( item );
+					this._items.push( item );
 				}
 			}
 		}
@@ -46,7 +54,66 @@ NDI.NTree.prototype = {
 			this.split( box, n + 1 );
 			this.split( spawn, n + 1 );
 		} else {
-			this.children.push( new NDI.NTree( box, this, this.maxCapacity, this.collides ) );
+			this._children.push( new NDI.NTree( box, this._config, this ) );
+		}
+
+	},
+
+	clear: function () {
+
+		this._items = [];
+		this._children = null;
+
+	},
+
+	queryCollision: function ( query ) {
+
+		if ( query.collides( this._aabb ) ) {
+			query.addResults(this._items);
+
+			if ( this._children ) {
+				for ( var i = 0; i < this._children.length; i++ ) {
+					this._children[i].queryCollision( query );
+				}
+			}
+		}
+
+	},
+
+	queryNearest: function ( query ) {
+
+		if ( ! query.maxDist ) {
+			query.maxDist = Infinity;
+		}
+
+		if ( this._aabb.distanceToPoint( query.point ) < query.maxDist ) {
+			for ( var i = 0; i < this._items.length; i++ ) {
+				var distance = query.distanceTo( this._items[i] );
+				if ( distance < query.maxDist ) {
+					query.nearest = this._items[i];
+					query.maxDist = distance;
+				}
+			}
+
+			if ( this._children ) {
+				var sorted = [];
+				for ( var i = 0; i < this._children.length; i++ ) {
+					var weighed = {};
+					weighed.child = this._children[i];
+					weighed.distance = this._children[i].aabb.distanceToPoint( query.point );
+					sorted.push( weighed );
+				}
+
+				sorted.sort
+
+				this._children.sort( function( a, b ) {
+					return a.distance - b.distance;
+				} );
+
+				for ( var i = 0; i < sorted.length; i++ ) {
+					sorted[i].child.queryNearest( query );
+				}
+			}
 		}
 
 	}
