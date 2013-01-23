@@ -1,7 +1,14 @@
 NDI.VectorND = function () {
 
 	if ( arguments.length > 0 ) {
-		this.set.apply( this, arguments );
+		if ( arguments.length > 1 ) {
+			this.set.apply( this, arguments );
+		} else {
+			this.coords = [];
+			for ( var i = 0; i < arguments[0] ; i++ ) {
+				this.coords.push( 0 );
+			}
+		}
 	} else {
 		this.coords = [];
 	}

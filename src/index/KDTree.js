@@ -1,16 +1,29 @@
-NDI.NTree = function ( aabb, config, parent ) {
+NDI.KDTree = function ( config, parent ) {
 
-	this._aabb = aabb;
+	this._aabb = new NDI.AABBND();
 	this._parent = parent;
 	this._items = [];
 	this._children = null;
 	this._config = config;
+
+	if ( this._parent ) {
+		this._aabb.copy( parent._aabb );
+	} else {
+		this._aabb.set( new NDI.VectorND( config.k ), new NDI.VectorND( config.k ) );
+		this._aabb.min.fill( -Infinity );
+		this._aabb.max.fill( Infinity );
+	}
+
+	this._dimension = parent ? parent._dimension + 1 : 0;
+	if ( this._dimension >= this._config.k ) {
+		this._dimension = 0;
+	}
 };
 
 
-NDI.NTree.prototype = {
+NDI.KDTree.prototype = {
 
-	constructor: NDI.NTree,
+	constructor: NDI.KDTree,
 
 	add: function ( item ) {
 
@@ -24,7 +37,7 @@ NDI.NTree.prototype = {
 
 		if ( this._children ) {
 			var collided = [];
-			for ( var i = 0; i < this._children.length && collided.length < 2; i++ ) {
+			for ( var i = 0; i < this._children.length; i++ ) {
 				if ( this._config.collisionTest( this._children[i]._aabb, item ) ) {
 					collided.push( this._children[i] );
 				}
@@ -36,34 +49,31 @@ NDI.NTree.prototype = {
 				this._items.push( item );
 			}
 		} else {
+			this._items.push( item );
+
 			if ( this._items.length >= this._config.maxCapacity ) {
-				this._children = [];
 				this.split( new NDI.AABBND().copy(this._aabb), 0 );
 				var itemsCopy = this._items.slice( 0 );
 				this._items = [];
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
 					this._add( itemsCopy[i] );
 				}
-				this._add( item );
-			} else {
-				this._items.push( item );
 			}
 		}
 
 	},
 
-	split: function ( box, n ) {
+	split: function () {
+		
+		var median = this._config.getMedian( this._items, this._dimension );
+		
+		var childLeft = new NDI.KDTree( this._config, this );
+		var childRight = new NDI.KDTree( this._config, this );
 
-		if ( n < box.getN() ) {
-			var spawn = new NDI.AABBND().copy( box );
-			box.max.coords[n] = box.min.coords[n] + ( box.max.coords[n] - box.min.coords[n] ) * 0.5;
-			spawn.min.coords[n] = box.max.coords[n];
+		childLeft._aabb.max.coords[this._dimension] = median;
+		childRight._aabb.min.coords[this._dimension] = median;
 
-			this.split( box, n + 1 );
-			this.split( spawn, n + 1 );
-		} else {
-			this._children.push( new NDI.NTree( box, this._config, this ) );
-		}
+		this._children = [childLeft, childRight];
 
 	},
 

@@ -1,0 +1,129 @@
+<html>
+	<head>
+		<script src="src/NDI.js"></script>
+		<script src="src/geom/VectorND.js"></script>
+		<script src="src/geom/AABBND.js"></script>
+		<script src="src/index/KDTree.js"></script>
+	</head>
+
+	<body>
+		<script type="text/javascript">
+
+			//Initializing the octree
+			var config = {
+				"k": 3,
+				"maxCapacity": 20,
+				"collisionTest": function ( aabb, v ) {
+					return aabb.containsPoint( v );
+				},
+				"getMedian": function ( items, dimension ) {
+					var bounds = new NDI.AABBND( new NDI.VectorND( 0, 0, 0 ),  new NDI.VectorND( 0, 0, 0 ) );
+					bounds.makeEmpty()
+					for ( var i = 0; i < items.length; i++ ) {
+						bounds.expandByPoint( items[i ]);
+					}
+
+					return bounds.min.coords[dimension] + ( ( bounds.max.coords[dimension] - bounds.min.coords[dimension] ) * 0.5 );
+				}
+			};
+			var tree = new NDI.KDTree( config );
+
+
+			//Dummy points population
+			var points = [];
+
+			for ( var i = 0; i < 1000000; i++ ) {
+				var vect = new NDI.VectorND( Math.random()*10, Math.random()*10, Math.random()*10 );
+				tree.add( vect );
+				points.push( vect );
+			}
+
+			//Collision query
+			var queryBounds = new NDI.AABBND( new NDI.VectorND( 2.5, 5, 6 ),  new NDI.VectorND( 2.6, 5.2, 6.2 ) );
+			var query = {
+				"collides": function ( aabb ) {
+					return aabb.isIntersectionBox( queryBounds );
+				},
+				"results": [],
+				"addResults": function ( results ) {
+					for ( var i = 0; i < results.length; i++ ) {
+						if ( queryBounds.containsPoint( results[i] ) ) {
+							this.results.push( results[i] );
+						}
+					}
+				}
+			};
+
+			console.time("Tree collision");
+			for ( var i = 0; i < 100; i++ ) {
+				query.results = [];
+				tree.queryCollision( query );
+			}
+			console.timeEnd("Tree collision");
+
+
+			//Checking collision query results
+
+			console.time("Brute collision");
+			var bfResults = [];
+			for ( var j = 0; j < 100; j++ ) {
+				bfResults = [];
+				for ( var i = 0; i < points.length; i++ ) {
+					if ( queryBounds.containsPoint( points[i] ) ) {
+						bfResults.push( points[i] );
+					}
+				}
+			}
+			console.timeEnd("Brute collision");
+
+			for ( var i = 0; i < query.results.length; i++ ) {
+				console.log("COLLISION QUERY ", query.results[i].coords );
+			}
+
+			console.log("");
+
+			for ( var i = 0; i < bfResults.length; i++ ) {
+				console.log("BRUTE FORCE ", bfResults[i].coords );
+			}
+
+			
+			//Nearest neightbor query 
+			var nnQuery = {
+				"point": new NDI.VectorND( 3, 2, 1 ),
+				"distanceTo": function ( v ) {
+					return this.point.distanceTo( v );
+				},
+			};
+
+			console.time("Tree NN");
+			for ( var i = 0; i < 100; i++ ) {
+				nnQuery.maxDist = Infinity;
+				tree.queryNearest( nnQuery );
+			}
+			console.timeEnd("Tree NN");
+
+
+			//Checking nearest neighbor query
+			console.time("Brute NN");
+			var bestNN = null;
+			var bestNNDist = Infinity;
+			for ( var j = 0; j < 100; j++ ) {
+				bestNN = null;
+				bestNNDist = Infinity;
+
+				for ( var i = 0; i < points.length; i++ ) {
+					var dist = points[i].distanceTo( nnQuery.point );
+					if ( dist < bestNNDist ) {
+						bestNN = points[i];
+						bestNNDist = dist;
+					}
+				}
+			}
+			console.timeEnd("Brute NN");
+
+			console.log("");
+			console.log("NN QUERY ", nnQuery.nearest.coords );
+			console.log("BRUTE FORCE ", bestNN.coords );
+		</script>
+	</body>	
+</html>
