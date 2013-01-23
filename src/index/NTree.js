@@ -67,11 +67,47 @@ NDI.NTree.prototype = {
 
 	},
 
+	remove: function ( item ) {
+
+		if ( this._config.collisionTest( this._aabb, item ) ) {
+			for ( var i = 0; i < this._items.length; i++ ) {
+				if ( this._items[i] === item ) {
+					this._items.splice(i, 1);
+					this._cleanup();
+					return true;
+				}
+			}
+
+			for ( var i = 0; i < this._children.length; i++ ) {
+				if ( this._children[i].remove( item ) ) {
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+	},
+
 	clear: function () {
 
 		this._items = [];
 		this._children = null;
 
+	},
+
+	_cleanup: function () {
+
+		for ( var i = 0; this._children && i < this._children.length; i++ ) {
+			if ( this._children[i]._items.length > 0 || this._children[i]._children ) {
+				return;
+			}
+		}
+
+		this._children = null;
+		if ( this._items.length == 0 && this._parent ) {
+			this._parent._cleanup();
+		}
 	},
 
 	queryCollision: function ( query ) {
@@ -112,9 +148,7 @@ NDI.NTree.prototype = {
 					sorted.push( weighed );
 				}
 
-				sorted.sort
-
-				this._children.sort( function( a, b ) {
+				sorted.sort( function( a, b ) {
 					return a.distance - b.distance;
 				} );
 

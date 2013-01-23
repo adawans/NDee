@@ -125,7 +125,13 @@ NDI.AABBND.prototype = {
 
 	distanceToPoint: function ( point ) {
 
-		return this.clampPoint( point ).sub( point ).length();
+		return Math.sqrt( this.distanceToPointSquared(point) );
+
+	},
+
+	distanceToPointSquared: function ( point ) {
+
+		return this.clampPoint( point ).sub( point ).lengthSq();
 
 	},
 
