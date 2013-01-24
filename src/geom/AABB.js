@@ -1,13 +1,18 @@
-NDI.AABBND = function ( min, max ) {
+/**
+ * @author adawans
+ */
 
-	this.min = min || new NDI.VectorND();
-	this.max = max || new NDI.VectorND();
+
+ NDee.AABB = function ( min, max ) {
+
+	this.min = min || new NDee.Vector();
+	this.max = max || new NDee.Vector();
 
 };
 
-NDI.AABBND.prototype = {
+NDee.AABB.prototype = {
 
-	constructor: NDI.AABBND,
+	constructor: NDee.AABB,
 
 	getN: function () {
 
@@ -119,7 +124,7 @@ NDI.AABBND.prototype = {
 
 	clampPoint: function ( point ) {
 
-		return new NDI.VectorND().copy( point ).clamp( this.min, this.max );
+		return new NDee.Vector().copy( point ).clamp( this.min, this.max );
 
 	},
 
@@ -171,7 +176,7 @@ NDI.AABBND.prototype = {
 
 	clone: function () {
 
-		return new NDI.AABBND().copy( this );
+		return new NDee.AABB().copy( this );
 
 	}
 

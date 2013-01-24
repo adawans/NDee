@@ -1,4 +1,9 @@
-NDI.NTree = function ( aabb, config, parent ) {
+/**
+ * @author adawans
+ */
+ 
+
+NDee.2NTree = function ( aabb, config, parent ) {
 
 	this._aabb = aabb;
 	this._parent = parent;
@@ -8,9 +13,9 @@ NDI.NTree = function ( aabb, config, parent ) {
 };
 
 
-NDI.NTree.prototype = {
+NDee.2NTree.prototype = {
 
-	constructor: NDI.NTree,
+	constructor: NDee.2NTree,
 
 	add: function ( item ) {
 
@@ -38,7 +43,7 @@ NDI.NTree.prototype = {
 		} else {
 			if ( this._items.length >= this._config.maxCapacity ) {
 				this._children = [];
-				this.split( new NDI.AABBND().copy(this._aabb), 0 );
+				this.split( new NDee.AABB().copy(this._aabb), 0 );
 				var itemsCopy = this._items.slice( 0 );
 				this._items = [];
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
@@ -55,14 +60,14 @@ NDI.NTree.prototype = {
 	split: function ( box, n ) {
 
 		if ( n < box.getN() ) {
-			var spawn = new NDI.AABBND().copy( box );
+			var spawn = new NDee.AABB().copy( box );
 			box.max.coords[n] = box.min.coords[n] + ( box.max.coords[n] - box.min.coords[n] ) * 0.5;
 			spawn.min.coords[n] = box.max.coords[n];
 
 			this.split( box, n + 1 );
 			this.split( spawn, n + 1 );
 		} else {
-			this._children.push( new NDI.NTree( box, this._config, this ) );
+			this._children.push( new NDee.2NTree( box, this._config, this ) );
 		}
 
 	},

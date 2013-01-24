@@ -1,6 +1,11 @@
-NDI.KDTree = function ( config, parent ) {
+/**
+ * @author adawans
+ */
 
-	this._aabb = new NDI.AABBND();
+
+NDee.KDTree = function ( config, parent ) {
+
+	this._aabb = new NDee.AABB();
 	this._parent = parent;
 	this._items = [];
 	this._children = null;
@@ -9,7 +14,7 @@ NDI.KDTree = function ( config, parent ) {
 	if ( this._parent ) {
 		this._aabb.copy( parent._aabb );
 	} else {
-		this._aabb.set( new NDI.VectorND( config.k ), new NDI.VectorND( config.k ) );
+		this._aabb.set( new NDee.Vector( config.k ), new NDee.Vector( config.k ) );
 		this._aabb.min.fill( -Infinity );
 		this._aabb.max.fill( Infinity );
 	}
@@ -21,9 +26,9 @@ NDI.KDTree = function ( config, parent ) {
 };
 
 
-NDI.KDTree.prototype = {
+NDee.KDTree.prototype = {
 
-	constructor: NDI.KDTree,
+	constructor: NDee.KDTree,
 
 	add: function ( item ) {
 
@@ -52,7 +57,7 @@ NDI.KDTree.prototype = {
 			this._items.push( item );
 
 			if ( this._items.length >= this._config.maxCapacity ) {
-				this.split( new NDI.AABBND().copy(this._aabb), 0 );
+				this.split( new NDee.AABB().copy(this._aabb), 0 );
 				var itemsCopy = this._items.slice( 0 );
 				this._items = [];
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
@@ -67,8 +72,8 @@ NDI.KDTree.prototype = {
 		
 		var median = this._config.getMedian( this._items, this._dimension );
 		
-		var childLeft = new NDI.KDTree( this._config, this );
-		var childRight = new NDI.KDTree( this._config, this );
+		var childLeft = new NDee.KDTree( this._config, this );
+		var childRight = new NDee.KDTree( this._config, this );
 
 		childLeft._aabb.max.coords[this._dimension] = median;
 		childRight._aabb.min.coords[this._dimension] = median;

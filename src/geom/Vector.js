@@ -1,4 +1,9 @@
-NDI.VectorND = function () {
+/**
+ * @author adawans
+ */
+
+
+NDee.Vector = function () {
 
 	if ( arguments.length > 0 ) {
 		if ( arguments.length > 1 ) {
@@ -16,9 +21,9 @@ NDI.VectorND = function () {
 };
 
 
-NDI.VectorND.prototype = {
+NDee.Vector.prototype = {
 
-	constructor: NDI.VectorND,
+	constructor: NDee.Vector,
 
 	getN: function () {
 
@@ -273,7 +278,7 @@ NDI.VectorND.prototype = {
 
 	clone: function () {
 
-		return new NDI.VectorND().copy( this );
+		return new NDee.Vector().copy( this );
 
 	}
 

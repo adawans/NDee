@@ -1,36 +1,36 @@
 <html>
 	<head>
-		<script src="src/NDI.js"></script>
-		<script src="src/geom/VectorND.js"></script>
-		<script src="src/geom/AABBND.js"></script>
-		<script src="src/index/NTree.js"></script>
+		<script src="src/NDee.js"></script>
+		<script src="src/geom/Vector.js"></script>
+		<script src="src/geom/AABB.js"></script>
+		<script src="src/index/2NTree.js"></script>
 	</head>
 
 	<body>
 		<script type="text/javascript">
 
 			//Initializing the octree
-			var aabb = new NDI.AABBND( new NDI.VectorND( 0, 0, 0 ),  new NDI.VectorND( 10, 10, 10 ) );
+			var aabb = new NDee.AABB( new NDee.Vector( 0, 0, 0 ),  new NDee.Vector( 10, 10, 10 ) );
 			var config = {
 				"maxCapacity": 20,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				}
 			};
-			var tree = new NDI.NTree( aabb, config );
+			var tree = new NDee.2NTree( aabb, config );
 
 
 			//Dummy points population
 			var points = [];
 
 			for ( var i = 0; i < 1000000; i++ ) {
-				var vect = new NDI.VectorND( Math.random()*10, Math.random()*10, Math.random()*10 );
+				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
 			}
 
 			//Collision query
-			var queryBounds = new NDI.AABBND( new NDI.VectorND( 2.5, 5, 6 ),  new NDI.VectorND( 2.6, 5.2, 6.2 ) );
+			var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );
 			var query = {
 				"collides": function ( aabb ) {
 					return aabb.isIntersectionBox( queryBounds );
@@ -80,7 +80,7 @@
 			
 			//Nearest neightbor query 
 			var nnQuery = {
-				"point": new NDI.VectorND( 3, 2, 1 ),
+				"point": new NDee.Vector( 3, 2, 1 ),
 				"distanceTo": function ( v ) {
 					return this.point.distanceTo( v );
 				},

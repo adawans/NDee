@@ -1,13 +1,18 @@
-NDI.SphereND = function ( center, radius ) {
+/**
+ * @author adawans
+ */
+ 
 
-	this.center = center ? center : new NDI.VectorND();
+NDee.Sphere = function ( center, radius ) {
+
+	this.center = center ? center : new NDee.Vector();
 	this.radius = radius ? radius : 0;
 
 };
 
-NDI.SphereND.prototype = {
+NDee.Sphere.prototype = {
 
-	constructor: NDI.SphereND,
+	constructor: NDee.Sphere,
 
 	getN: function () {
 
@@ -75,7 +80,7 @@ NDI.SphereND.prototype = {
 
 	getBoundingBox: function ( optionalTarget ) {
 
-		var box = new NDI.AABBND();
+		var box = new NDee.AABBND();
 
 		box.set( this.center, this.center );
 		box.expandByScalar( this.radius );
@@ -100,7 +105,7 @@ NDI.SphereND.prototype = {
 
 	clone: function () {
 
-		return new NDI.SphereND().copy( this );
+		return new NDee.Sphere().copy( this );
 
 	}
 
