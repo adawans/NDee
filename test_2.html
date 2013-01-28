@@ -12,7 +12,7 @@
 			//Initializing the octree
 			var config = {
 				"k": 3,
-				"maxCapacity": 20,
+				"maxCapacity": 100,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				},
@@ -32,98 +32,100 @@
 			//Dummy points population
 			var points = [];
 
-			for ( var i = 0; i < 1000000; i++ ) {
+			console.time("BUILD");
+			for ( var i = 0; i < 10000; i++ ) {
 				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
 			}
+			console.timeEnd("BUILD");
 
 			//Collision query
-			var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );
-			var query = {
-				"collides": function ( aabb ) {
-					return aabb.isIntersectionBox( queryBounds );
-				},
-				"results": [],
-				"addResults": function ( results ) {
-					for ( var i = 0; i < results.length; i++ ) {
-						if ( queryBounds.containsPoint( results[i] ) ) {
-							this.results.push( results[i] );
-						}
-					}
-				}
-			};
+			// var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );
+			// var query = {
+			// 	"collides": function ( aabb ) {
+			// 		return aabb.isIntersectionBox( queryBounds );
+			// 	},
+			// 	"results": [],
+			// 	"addResults": function ( results ) {
+			// 		for ( var i = 0; i < results.length; i++ ) {
+			// 			if ( queryBounds.containsPoint( results[i] ) ) {
+			// 				this.results.push( results[i] );
+			// 			}
+			// 		}
+			// 	}
+			// };
 
-			console.time("Tree collision");
-			for ( var i = 0; i < 100; i++ ) {
-				query.results = [];
-				tree.queryCollision( query );
-			}
-			console.timeEnd("Tree collision");
+			// console.time("Tree collision");
+			// for ( var i = 0; i < 100; i++ ) {
+			// 	query.results = [];
+			// 	tree.queryCollision( query );
+			// }
+			// console.timeEnd("Tree collision");
 
 
-			//Checking collision query results
+			// //Checking collision query results
 
-			console.time("Brute collision");
-			var bfResults = [];
-			for ( var j = 0; j < 100; j++ ) {
-				bfResults = [];
-				for ( var i = 0; i < points.length; i++ ) {
-					if ( queryBounds.containsPoint( points[i] ) ) {
-						bfResults.push( points[i] );
-					}
-				}
-			}
-			console.timeEnd("Brute collision");
+			// console.time("Brute collision");
+			// var bfResults = [];
+			// for ( var j = 0; j < 100; j++ ) {
+			// 	bfResults = [];
+			// 	for ( var i = 0; i < points.length; i++ ) {
+			// 		if ( queryBounds.containsPoint( points[i] ) ) {
+			// 			bfResults.push( points[i] );
+			// 		}
+			// 	}
+			// }
+			// console.timeEnd("Brute collision");
 
-			for ( var i = 0; i < query.results.length; i++ ) {
-				console.log("COLLISION QUERY ", query.results[i].coords );
-			}
+			// for ( var i = 0; i < query.results.length; i++ ) {
+			// 	console.log("COLLISION QUERY ", query.results[i].coords );
+			// }
 
-			console.log("");
+			// console.log("");
 
-			for ( var i = 0; i < bfResults.length; i++ ) {
-				console.log("BRUTE FORCE ", bfResults[i].coords );
-			}
+			// for ( var i = 0; i < bfResults.length; i++ ) {
+			// 	console.log("BRUTE FORCE ", bfResults[i].coords );
+			// }
 
 			
-			//Nearest neightbor query 
-			var nnQuery = {
-				"point": new NDee.Vector( 3, 2, 1 ),
-				"distanceTo": function ( v ) {
-					return this.point.distanceTo( v );
-				},
-			};
+			// //Nearest neightbor query 
+			// var nnQuery = {
+			// 	"point": new NDee.Vector( 3, 2, 1 ),
+			// 	"distanceTo": function ( v ) {
+			// 		return this.point.distanceTo( v );
+			// 	},
+			// };
 
-			console.time("Tree NN");
-			for ( var i = 0; i < 100; i++ ) {
-				nnQuery.maxDist = Infinity;
-				tree.queryNearest( nnQuery );
-			}
-			console.timeEnd("Tree NN");
+			// console.time("Tree NN");
+			// for ( var i = 0; i < 100; i++ ) {
+			// 	nnQuery.maxDist = Infinity;
+			// 	tree.queryNearest( nnQuery );
+			// }
+			// console.timeEnd("Tree NN");
 
 
-			//Checking nearest neighbor query
-			console.time("Brute NN");
-			var bestNN = null;
-			var bestNNDist = Infinity;
-			for ( var j = 0; j < 100; j++ ) {
-				bestNN = null;
-				bestNNDist = Infinity;
+			// //Checking nearest neighbor query
+			// console.time("Brute NN");
+			// var bestNN = null;
+			// var bestNNDist = Infinity;
+			// for ( var j = 0; j < 100; j++ ) {
+			// 	bestNN = null;
+			// 	bestNNDist = Infinity;
 
-				for ( var i = 0; i < points.length; i++ ) {
-					var dist = points[i].distanceTo( nnQuery.point );
-					if ( dist < bestNNDist ) {
-						bestNN = points[i];
-						bestNNDist = dist;
-					}
-				}
-			}
-			console.timeEnd("Brute NN");
+			// 	for ( var i = 0; i < points.length; i++ ) {
+			// 		var dist = points[i].distanceTo( nnQuery.point );
+			// 		if ( dist < bestNNDist ) {
+			// 			bestNN = points[i];
+			// 			bestNNDist = dist;
+			// 		}
+			// 	}
+			// }
+			// console.timeEnd("Brute NN");
 
-			console.log("");
-			console.log("NN QUERY ", nnQuery.nearest.coords );
-			console.log("BRUTE FORCE ", bestNN.coords );
+			// console.log("");
+			// console.log("NN QUERY ", nnQuery.nearest.coords );
+			// console.log("BRUTE FORCE ", bestNN.coords );
 		</script>
 	</body>	
 </html>

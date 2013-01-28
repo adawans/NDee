@@ -3,7 +3,7 @@
 		<script src="src/NDee.js"></script>
 		<script src="src/geom/Vector.js"></script>
 		<script src="src/geom/AABB.js"></script>
-		<script src="src/index/2NTree.js"></script>
+		<script src="src/index/Pow2Tree.js"></script>
 	</head>
 
 	<body>
@@ -12,22 +12,24 @@
 			//Initializing the octree
 			var aabb = new NDee.AABB( new NDee.Vector( 0, 0, 0 ),  new NDee.Vector( 10, 10, 10 ) );
 			var config = {
-				"maxCapacity": 20,
+				"maxCapacity": 100,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				}
 			};
-			var tree = new NDee.2NTree( aabb, config );
+			var tree = new NDee.Pow2Tree( aabb, config );
 
 
 			//Dummy points population
 			var points = [];
 
-			for ( var i = 0; i < 1000000; i++ ) {
+			console.time("BUILD");
+			for ( var i = 0; i < 10000; i++ ) {
 				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
 			}
+			console.timeEnd("BUILD");
 
 			//Collision query
 			var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );

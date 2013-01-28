@@ -34,32 +34,36 @@ NDee.KDTree.prototype = {
 
 		if ( this._config.collisionTest( this._aabb, item ) ) {
 			this._add( item );
+			return true;
 		}
+
+		return false;
 
 	},
 
 	_add: function ( item ) {
 
 		if ( this._children ) {
-			var collided = [];
-			for ( var i = 0; i < this._children.length; i++ ) {
-				if ( this._config.collisionTest( this._children[i]._aabb, item ) ) {
-					collided.push( this._children[i] );
+			if ( this._config.collisionTest( this._children[0]._aabb, item ) ) {
+				if ( this._config.collisionTest( this._children[1]._aabb, item ) ) {
+					this._items.push( item );
+				} else {
+					this._children[0]._add( item );
 				}
-			}
-
-			if ( collided.length === 1 ) {
-				collided[0]._add( item );
 			} else {
-				this._items.push( item );
+				if ( this._config.collisionTest( this._children[1]._aabb, item ) ) {
+					this._children[1]._add( item );
+				} else {
+					this._items.push( item );
+				}
 			}
 		} else {
 			this._items.push( item );
 
 			if ( this._items.length >= this._config.maxCapacity ) {
-				this.split( new NDee.AABB().copy(this._aabb), 0 );
+				this._split( new NDee.AABB().copy(this._aabb), 0 );
 				var itemsCopy = this._items.slice( 0 );
-				this._items = [];
+				this._items.length = 0;
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
 					this._add( itemsCopy[i] );
 				}
@@ -68,7 +72,7 @@ NDee.KDTree.prototype = {
 
 	},
 
-	split: function () {
+	_split: function () {
 		
 		var median = this._config.getMedian( this._items, this._dimension );
 		
@@ -104,6 +108,36 @@ NDee.KDTree.prototype = {
 
 	},
 
+	move: function ( item, oldVersion ) {
+
+		if ( this._config.collisionTest( this._aabb, oldVersion ) ) {
+			var found = false;
+			for ( var i = 0; i < this._items.length; i++ ) {
+				if ( this._items[i] === item ) {
+					if ( this._config.collisionTest( this._aabb, item ) ) {
+						return;
+					}
+
+					this._items.splice(i, 1);
+					this._cleanup();
+
+					var parent = this._parent;
+					while ( parent != null && !parent.add( item ) ) {
+						parent = parent._parent;
+					}
+					return;
+				}
+			}
+
+			for ( var i = 0; i < this._children.length; i++ ) {
+				if ( this._children[i].move( item, oldVersion ) ) {
+					return;
+				}
+			}
+		}
+
+	},
+
 	clear: function () {
 
 		this._items = [];
@@ -128,7 +162,9 @@ NDee.KDTree.prototype = {
 	queryCollision: function ( query ) {
 
 		if ( query.collides( this._aabb ) ) {
-			query.addResults(this._items);
+			if ( this._items.length > 0 ) {
+				query.addResults(this._items);
+			}
 
 			if ( this._children ) {
 				for ( var i = 0; i < this._children.length; i++ ) {

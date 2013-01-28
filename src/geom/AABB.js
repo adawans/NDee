@@ -10,6 +10,10 @@
 
 };
 
+
+NDee.AABB.__v1 = new NDee.Vector();
+
+
 NDee.AABB.prototype = {
 
 	constructor: NDee.AABB,
@@ -29,10 +33,10 @@ NDee.AABB.prototype = {
 
 	},
 
-	copy: function ( box ) {
+	copy: function ( aabb ) {
 
-		this.min.copy( box.min );
-		this.max.copy( box.max );
+		this.min.copy( aabb.min );
+		this.max.copy( aabb.max );
 
 		return this;
 
@@ -98,10 +102,10 @@ NDee.AABB.prototype = {
 
 	},
 
-	containsBox: function ( box ) {
+	containsAABB: function ( aabb ) {
 
 		for ( var i = 0; i < this.min.getN(); i++ ) {
-			if ( box.min.coords[i] < this.min.coords[i] || box.max.coords[i] > this.max.coords[i] ) {
+			if ( aabb.min.coords[i] < this.min.coords[i] || aabb.max.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
 		}
@@ -110,21 +114,36 @@ NDee.AABB.prototype = {
 
 	},
 
-	isIntersectionBox: function ( box ) {
+	isIntersectionAABB: function ( aabb ) {
 
 		for ( var i = 0; i < this.min.getN(); i++ ) {
-			if ( box.max.coords[i] < this.min.coords[i] || box.min.coords[i] > this.max.coords[i] ) {
+			if ( aabb.max.coords[i] < this.min.coords[i] || aabb.min.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
 		}
 
 		return true;
+
+	},
+
+	isIntersectionSphere: function ( sphere ) {
+
+		for ( var i = 0; i < this.min.getN(); i++ ) {
+			if ( sphere.center.coords[i] + sphere.radius < this.min.coords[i] || 
+				sphere.center.coords[i] - sphere.radius > this.max.coords[i] ) {
+				return false;
+			}
+		}
+
+		buffer = NDee.AABB.__v1;
+		buffer = this.clampPoint( buffer.copy( sphere.center ) );
+		return buffer.distanceTo( sphere.center ) <= sphere.radius ;
 
 	},
 
 	clampPoint: function ( point ) {
 
-		return new NDee.Vector().copy( point ).clamp( this.min, this.max );
+		return point.clamp( this.min, this.max );
 
 	},
 
@@ -141,19 +160,19 @@ NDee.AABB.prototype = {
 	},
 
 
-	intersect: function ( box ) {
+	intersect: function ( aabb ) {
 
-		this.min.max( box.min );
-		this.max.min( box.max );
+		this.min.max( aabb.min );
+		this.max.min( aabb.max );
 
 		return this;
 
 	},
 
-	union: function ( box ) {
+	union: function ( aabb ) {
 
-		this.min.min( box.min );
-		this.max.max( box.max );
+		this.min.min( aabb.min );
+		this.max.max( aabb.max );
 
 		return this;
 
@@ -168,9 +187,9 @@ NDee.AABB.prototype = {
 
 	},
 
-	equals: function ( box ) {
+	equals: function ( aabb ) {
 
-		return box.min.equals( this.min ) && box.max.equals( this.max );
+		return aabb.min.equals( this.min ) && aabb.max.equals( this.max );
 
 	},
 

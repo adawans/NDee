@@ -3,7 +3,7 @@
  */
  
 
-NDee.2NTree = function ( aabb, config, parent ) {
+NDee.Pow2Tree = function ( aabb, config, parent ) {
 
 	this._aabb = aabb;
 	this._parent = parent;
@@ -13,9 +13,9 @@ NDee.2NTree = function ( aabb, config, parent ) {
 };
 
 
-NDee.2NTree.prototype = {
+NDee.Pow2Tree.prototype = {
 
-	constructor: NDee.2NTree,
+	constructor: NDee.Pow2Tree,
 
 	add: function ( item ) {
 
@@ -45,7 +45,7 @@ NDee.2NTree.prototype = {
 				this._children = [];
 				this.split( new NDee.AABB().copy(this._aabb), 0 );
 				var itemsCopy = this._items.slice( 0 );
-				this._items = [];
+				this._items.length = 0;
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
 					this._add( itemsCopy[i] );
 				}
@@ -67,7 +67,7 @@ NDee.2NTree.prototype = {
 			this.split( box, n + 1 );
 			this.split( spawn, n + 1 );
 		} else {
-			this._children.push( new NDee.2NTree( box, this._config, this ) );
+			this._children.push( new NDee.Pow2Tree( box, this._config, this ) );
 		}
 
 	},
@@ -90,6 +90,36 @@ NDee.2NTree.prototype = {
 			}
 
 			return false;
+		}
+
+	},
+
+	move: function ( item, oldVersion ) {
+
+		if ( this._config.collisionTest( this._aabb, oldVersion ) ) {
+			var found = false;
+			for ( var i = 0; i < this._items.length; i++ ) {
+				if ( this._items[i] === item ) {
+					if ( this._config.collisionTest( this._aabb, item ) ) {
+						return;
+					}
+
+					this._items.splice(i, 1);
+					this._cleanup();
+
+					var parent = this._parent;
+					while ( parent != null && !parent.add( item ) ) {
+						parent = parent._parent;
+					}
+					return;
+				}
+			}
+
+			for ( var i = 0; i < this._children.length; i++ ) {
+				if ( this._children[i].move( item, oldVersion ) ) {
+					return;
+				}
+			}
 		}
 
 	},

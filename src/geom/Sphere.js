@@ -45,6 +45,12 @@ NDee.Sphere.prototype = {
 
 	containsPoint: function ( point ) {
 
+		for ( var i = 0; i < this.center.getN(); i++ ) {
+			if ( point.coords[i] < this.center.coords[i] - this.radius || point.coords[i] > this.center.coords[i] + this.radius ) {
+				return false;
+			}
+		}
+
 		return ( point.distanceToSquared( this.center ) <= ( this.radius * this.radius ) );
 
 	},
@@ -57,8 +63,14 @@ NDee.Sphere.prototype = {
 
 	intersectsSphere: function ( sphere ) {
 
-		var radiusSum = this.radius + sphere.radius;
+		for ( var i = 0; i < this.center.getN(); i++ ) {
+			if ( sphere.center.coords[i] + sphere.radius < this.center.coords[i] - this.radius || 
+				sphere.center.coords[i] - sphere.radius > this.center.coords[i] + this.radius ) {
+				return false;
+			}
+		}
 
+		var radiusSum = this.radius + sphere.radius;
 		return sphere.center.distanceToSquared( this.center ) <= ( radiusSum * radiusSum );
 
 	},
@@ -68,7 +80,6 @@ NDee.Sphere.prototype = {
 		var deltaLengthSq = this.center.distanceToSquared( point );
 
 		if ( deltaLengthSq > ( this.radius * this.radius ) ) {
-
 			point.sub( this.center ).normalize();
 			point.multiplyScalar( this.radius ).add( this.center );
 
@@ -78,9 +89,9 @@ NDee.Sphere.prototype = {
 
 	},
 
-	getBoundingBox: function ( optionalTarget ) {
+	getBoundingBox: function ( result ) {
 
-		var box = new NDee.AABBND();
+		var box = result || new NDee.AABBND();
 
 		box.set( this.center, this.center );
 		box.expandByScalar( this.radius );
