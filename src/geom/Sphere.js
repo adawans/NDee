@@ -51,7 +51,7 @@ NDee.Sphere.prototype = {
 			}
 		}
 
-		return ( point.distanceToSquared( this.center ) <= ( this.radius * this.radius ) );
+		return point.distanceToSquared( this.center ) <= ( this.radius * this.radius );
 
 	},
 

@@ -97,7 +97,6 @@ NDee.Pow2Tree.prototype = {
 	move: function ( item, oldVersion ) {
 
 		if ( this._config.collisionTest( this._aabb, oldVersion ) ) {
-			var found = false;
 			for ( var i = 0; i < this._items.length; i++ ) {
 				if ( this._items[i] === item ) {
 					if ( this._config.collisionTest( this._aabb, item ) ) {
@@ -165,7 +164,7 @@ NDee.Pow2Tree.prototype = {
 			query.maxDist = Infinity;
 		}
 
-		if ( this._aabb.distanceToPoint( query.point ) < query.maxDist ) {
+		if ( this._aabb.distanceToPointSquared( query.point ) < ( query.maxDist * query.maxDist ) ) {
 			for ( var i = 0; i < this._items.length; i++ ) {
 				var distance = query.distanceTo( this._items[i] );
 				if ( distance < query.maxDist ) {
@@ -175,20 +174,22 @@ NDee.Pow2Tree.prototype = {
 			}
 
 			if ( this._children ) {
-				var sorted = [];
-				for ( var i = 0; i < this._children.length; i++ ) {
-					var weighed = {};
-					weighed.child = this._children[i];
-					weighed.distance = this._children[i]._aabb.distanceToPoint( query.point );
-					sorted.push( weighed );
+				var best = null;
+				var bestDist = Infinity;
+				for ( var i = 0; i < this._children.length && bestDist > 0; i++ ) {
+					var distance = this._children[i]._aabb.distanceToPointSquared( query.point );
+					if ( distance < bestDist ) {
+						best = this._children[i];
+						bestDist = distance;
+					}
 				}
 
-				sorted.sort( function( a, b ) {
-					return a.distance - b.distance;
-				} );
+				best.queryNearest( query );
 
-				for ( var i = 0; i < sorted.length; i++ ) {
-					sorted[i].child.queryNearest( query );
+				for ( var i = 0; i < this._children.length; i++ ) {
+					if ( this._children[i] !== best ) {
+						this._children[i].queryNearest( query );
+					}
 				}
 			}
 		}

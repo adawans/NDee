@@ -61,7 +61,7 @@ NDee.KDTree.prototype = {
 			this._items.push( item );
 
 			if ( this._items.length >= this._config.maxCapacity ) {
-				this._split( new NDee.AABB().copy(this._aabb), 0 );
+				this._split();
 				var itemsCopy = this._items.slice( 0 );
 				this._items.length = 0;
 				for ( var i = 0; i < itemsCopy.length; i++ ) {
@@ -72,8 +72,8 @@ NDee.KDTree.prototype = {
 
 	},
 
-	_split: function () {
-		
+	_split: function ( ) {
+
 		var median = this._config.getMedian( this._items, this._dimension );
 		
 		var childLeft = new NDee.KDTree( this._config, this );
@@ -181,7 +181,7 @@ NDee.KDTree.prototype = {
 			query.maxDist = Infinity;
 		}
 
-		if ( this._aabb.distanceToPoint( query.point ) < query.maxDist ) {
+		if ( this._aabb.distanceToPointSquared( query.point ) < ( query.maxDist * query.maxDist ) ) {
 			for ( var i = 0; i < this._items.length; i++ ) {
 				var distance = query.distanceTo( this._items[i] );
 				if ( distance < query.maxDist ) {
@@ -191,20 +191,15 @@ NDee.KDTree.prototype = {
 			}
 
 			if ( this._children ) {
-				var sorted = [];
-				for ( var i = 0; i < this._children.length; i++ ) {
-					var weighed = {};
-					weighed.child = this._children[i];
-					weighed.distance = this._children[i]._aabb.distanceToPoint( query.point );
-					sorted.push( weighed );
-				}
+				var distLeft = this._children[0]._aabb.distanceToPointSquared( query.point );
+				var distRight = this._children[1]._aabb.distanceToPointSquared( query.point );
 
-				sorted.sort( function( a, b ) {
-					return a.distance - b.distance;
-				} );
-
-				for ( var i = 0; i < sorted.length; i++ ) {
-					sorted[i].child.queryNearest( query );
+				if ( distLeft < distRight ) {
+					this._children[0].queryNearest( query );
+					this._children[1].queryNearest( query );
+				} else {
+					this._children[1].queryNearest( query );
+					this._children[0].queryNearest( query );
 				}
 			}
 		}

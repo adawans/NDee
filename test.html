@@ -3,6 +3,7 @@
 		<script src="src/NDee.js"></script>
 		<script src="src/geom/Vector.js"></script>
 		<script src="src/geom/AABB.js"></script>
+		<script src="src/geom/Sphere.js"></script>
 		<script src="src/index/Pow2Tree.js"></script>
 	</head>
 
@@ -12,7 +13,7 @@
 			//Initializing the octree
 			var aabb = new NDee.AABB( new NDee.Vector( 0, 0, 0 ),  new NDee.Vector( 10, 10, 10 ) );
 			var config = {
-				"maxCapacity": 100,
+				"maxCapacity": 50,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				}
@@ -24,7 +25,7 @@
 			var points = [];
 
 			console.time("BUILD");
-			for ( var i = 0; i < 10000; i++ ) {
+			for ( var i = 0; i < 200000; i++ ) {
 				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
@@ -35,7 +36,7 @@
 			var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );
 			var query = {
 				"collides": function ( aabb ) {
-					return aabb.isIntersectionBox( queryBounds );
+					return aabb.isIntersectionAABB( queryBounds );
 				},
 				"results": [],
 				"addResults": function ( results ) {
@@ -48,7 +49,7 @@
 			};
 
 			console.time("Tree collision");
-			for ( var i = 0; i < 100; i++ ) {
+			for ( var i = 0; i < 1000; i++ ) {
 				query.results = [];
 				tree.queryCollision( query );
 			}
@@ -59,7 +60,7 @@
 
 			console.time("Brute collision");
 			var bfResults = [];
-			for ( var j = 0; j < 100; j++ ) {
+			for ( var j = 0; j < 1000; j++ ) {
 				bfResults = [];
 				for ( var i = 0; i < points.length; i++ ) {
 					if ( queryBounds.containsPoint( points[i] ) ) {
@@ -89,7 +90,7 @@
 			};
 
 			console.time("Tree NN");
-			for ( var i = 0; i < 100; i++ ) {
+			for ( var i = 0; i < 1000; i++ ) {
 				nnQuery.maxDist = Infinity;
 				tree.queryNearest( nnQuery );
 			}
@@ -100,15 +101,19 @@
 			console.time("Brute NN");
 			var bestNN = null;
 			var bestNNDist = Infinity;
-			for ( var j = 0; j < 100; j++ ) {
+			var sphere = new NDee.Sphere( nnQuery.point, bestNNDist );
+			for ( var j = 0; j < 1000; j++ ) {
 				bestNN = null;
 				bestNNDist = Infinity;
 
 				for ( var i = 0; i < points.length; i++ ) {
-					var dist = points[i].distanceTo( nnQuery.point );
-					if ( dist < bestNNDist ) {
-						bestNN = points[i];
-						bestNNDist = dist;
+					if ( sphere.containsPoint(points[i]) ) {
+						var dist = points[i].distanceTo( nnQuery.point );
+						if ( dist < bestNNDist ) {
+							bestNN = points[i];
+							bestNNDist = dist;
+							sphere.radius = dist;
+						}
 					}
 				}
 			}

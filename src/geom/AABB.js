@@ -155,7 +155,8 @@ NDee.AABB.prototype = {
 
 	distanceToPointSquared: function ( point ) {
 
-		return this.clampPoint( point ).sub( point ).lengthSq();
+		var buffer = NDee.AABB.__v1.copy( point );
+		return this.clampPoint( buffer ).sub( point ).lengthSq();
 
 	},
 
