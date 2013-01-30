@@ -13,7 +13,7 @@
 			//Initializing the octree
 			var config = {
 				"k": 3,
-				"maxCapacity": 100,
+				"maxCapacity": 50,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				},
@@ -34,7 +34,7 @@
 			var points = [];
 
 			console.time("BUILD");
-			for ( var i = 0; i < 1000000; i++ ) {
+			for ( var i = 0; i < 100000; i++ ) {
 				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
@@ -57,7 +57,7 @@
 			};
 
 			console.time("Tree collision");
-			for ( var i = 0; i < 100; i++ ) {
+			for ( var i = 0; i < 1000; i++ ) {
 				query.results = [];
 				tree.queryCollision( query );
 			}
@@ -68,7 +68,7 @@
 
 			console.time("Brute collision");
 			var bfResults = [];
-			for ( var j = 0; j < 100; j++ ) {
+			for ( var j = 0; j < 1000; j++ ) {
 				bfResults = [];
 				for ( var i = 0; i < points.length; i++ ) {
 					if ( queryBounds.containsPoint( points[i] ) ) {
@@ -92,13 +92,18 @@
 			//Nearest neightbor query 
 			var nnQuery = {
 				"point": new NDee.Vector( 3, 2, 1 ),
-				"distanceTo": function ( v ) {
+				"distanceTo": function ( v, maxDist ) {
+					for ( var i = 0; i < this.point.getN(); i++ ) {
+						if ( this.point.coords[i] < v.coords[i] - maxDist || this.point.coords[i] > v.coords[i] + maxDist ) {
+							return Infinity;
+						}
+					}
 					return this.point.distanceTo( v );
 				},
 			};
 
 			console.time("Tree NN");
-			for ( var i = 0; i < 100; i++ ) {
+			for ( var i = 0; i < 1000; i++ ) {
 				nnQuery.maxDist = Infinity;
 				tree.queryNearest( nnQuery );
 			}
@@ -110,7 +115,7 @@
 			var bestNN = null;
 			var bestNNDist = Infinity;
 			var sphere = new NDee.Sphere( nnQuery.point, bestNNDist );
-			for ( var j = 0; j < 100; j++ ) {
+			for ( var j = 0; j < 1000; j++ ) {
 				bestNN = null;
 				bestNNDist = Infinity;
 

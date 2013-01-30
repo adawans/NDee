@@ -7,6 +7,7 @@ NDee.Vector = function () {
 
 	if ( arguments.length > 0 ) {
 		if ( arguments.length > 1 ) {
+			this.coords = [];
 			this.set.apply( this, arguments );
 		} else {
 			this.coords = [];
@@ -33,7 +34,14 @@ NDee.Vector.prototype = {
 
 	set: function () {
 
-		this.coords = Array.prototype.slice.call(arguments);
+		if ( this.coords.length == arguments.length ) {
+			for ( var i = 0; i < this.coords.length; i++ ) {
+				this.coords[i] = arguments[i];
+			}
+		} else {
+			this.coords = Array.prototype.slice.call(arguments);
+		}
+		
 		return this;
 
 	},
@@ -53,7 +61,14 @@ NDee.Vector.prototype = {
 
 	copy: function ( v ) {
 
-		this.coords = v.coords.slice(0);
+		if ( this.coords.length == v.coords.length ) {
+			for ( var i = 0; i < this.coords.length; i++ ) {
+				this.coords[i] = v.coords[i];
+			}
+		} else {
+			this.coords = v.coords.slice(0);
+		}
+		
 		return this;
 
 	},
@@ -201,7 +216,7 @@ NDee.Vector.prototype = {
 
 	dot: function ( v ) {
 
-		result = 0;
+		var result = 0;
 		var length = Math.min(this.coords.length, v.coords.length);
 		for ( var i = 0; i < length; i++ ) {
 			result += this.coords[i] * v.coords[i];
@@ -243,13 +258,27 @@ NDee.Vector.prototype = {
 
 	angleTo: function ( v ) {
 
-		return Math.acos( this.dot( v ) / this.length() / v.length() );
+		return Math.acos( this.cosTo( v ) );
 
 	},
 
+	cosTo: function ( v ) {
+
+		return this.dot( v ) / this.length() / v.length();
+
+	},
+
+
 	distanceToSquared: function ( v ) {
 
-		return this.clone().sub( v ).lengthSq();
+		var result = 0;
+		var length = Math.min(this.coords.length, v.coords.length);
+		for ( var i = 0; i < length; i++ ) {
+			var value = this.coords[i] - v.coords[i];
+			result += value * value;
+		}
+
+		return result;
 
 	},
 
@@ -282,3 +311,5 @@ NDee.Vector.prototype = {
 	}
 
 };
+
+NDee.Vector.__v1 = new NDee.Vector();

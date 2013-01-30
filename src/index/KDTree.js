@@ -111,7 +111,6 @@ NDee.KDTree.prototype = {
 	move: function ( item, oldVersion ) {
 
 		if ( this._config.collisionTest( this._aabb, oldVersion ) ) {
-			var found = false;
 			for ( var i = 0; i < this._items.length; i++ ) {
 				if ( this._items[i] === item ) {
 					if ( this._config.collisionTest( this._aabb, item ) ) {
@@ -183,7 +182,7 @@ NDee.KDTree.prototype = {
 
 		if ( this._aabb.distanceToPointSquared( query.point ) < ( query.maxDist * query.maxDist ) ) {
 			for ( var i = 0; i < this._items.length; i++ ) {
-				var distance = query.distanceTo( this._items[i] );
+				var distance = query.distanceTo( this._items[i], query.maxDist );
 				if ( distance < query.maxDist ) {
 					query.nearest = this._items[i];
 					query.maxDist = distance;

@@ -11,16 +11,13 @@
 };
 
 
-NDee.AABB.__v1 = new NDee.Vector();
-
-
 NDee.AABB.prototype = {
 
 	constructor: NDee.AABB,
 
 	getN: function () {
 
-		return this.min.getN();
+		return this.min.coords.length;
 
 	},
 
@@ -53,7 +50,7 @@ NDee.AABB.prototype = {
 
 	empty: function () {
 
-		for ( var i = 0; i < this.min.getN(); i++ ) {
+		for ( var i = 0; i < this.min.coords.length; i++ ) {
 			if ( this.min.coords[i] > this.max.coords[i] ) {
 				return true;
 			}
@@ -92,7 +89,7 @@ NDee.AABB.prototype = {
 
 	containsPoint: function ( point ) {
 
-		for ( var i = 0; i < this.min.getN(); i++ ) {
+		for ( var i = 0; i < this.min.coords.length; i++ ) {
 			if ( point.coords[i] < this.min.coords[i] || point.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
@@ -104,7 +101,7 @@ NDee.AABB.prototype = {
 
 	containsAABB: function ( aabb ) {
 
-		for ( var i = 0; i < this.min.getN(); i++ ) {
+		for ( var i = 0; i < this.min.coords.length; i++ ) {
 			if ( aabb.min.coords[i] < this.min.coords[i] || aabb.max.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
@@ -116,7 +113,7 @@ NDee.AABB.prototype = {
 
 	isIntersectionAABB: function ( aabb ) {
 
-		for ( var i = 0; i < this.min.getN(); i++ ) {
+		for ( var i = 0; i < this.min.coords.length; i++ ) {
 			if ( aabb.max.coords[i] < this.min.coords[i] || aabb.min.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
@@ -128,16 +125,15 @@ NDee.AABB.prototype = {
 
 	isIntersectionSphere: function ( sphere ) {
 
-		for ( var i = 0; i < this.min.getN(); i++ ) {
+		for ( var i = 0; i < this.min.coords.length; i++ ) {
 			if ( sphere.center.coords[i] + sphere.radius < this.min.coords[i] || 
 				sphere.center.coords[i] - sphere.radius > this.max.coords[i] ) {
 				return false;
 			}
 		}
 
-		buffer = NDee.AABB.__v1;
-		buffer = this.clampPoint( buffer.copy( sphere.center ) );
-		return buffer.distanceTo( sphere.center ) <= sphere.radius ;
+		this.clampPoint( NDee.AABB.__v1.copy( sphere.center ) );
+		return NDee.AABB.__v1.distanceToSquared( sphere.center ) <= ( sphere.radius * sphere.radius );
 
 	},
 
@@ -201,3 +197,5 @@ NDee.AABB.prototype = {
 	}
 
 };
+
+NDee.AABB.__v1 = new NDee.Vector();
