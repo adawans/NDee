@@ -11,7 +11,7 @@ NDee.Vector = function () {
 			this.set.apply( this, arguments );
 		} else {
 			this.coords = [];
-			for ( var i = 0; i < arguments[0] ; i++ ) {
+			for ( var i = arguments[0]; i-- ; ) {
 				this.coords.push( 0 );
 			}
 		}
@@ -35,7 +35,7 @@ NDee.Vector.prototype = {
 	set: function () {
 
 		if ( this.coords.length == arguments.length ) {
-			for ( var i = 0; i < this.coords.length; i++ ) {
+			for ( var i = this.coords.length; i--; ) {
 				this.coords[i] = arguments[i];
 			}
 		} else {
@@ -62,7 +62,7 @@ NDee.Vector.prototype = {
 	copy: function ( v ) {
 
 		if ( this.coords.length == v.coords.length ) {
-			for ( var i = 0; i < this.coords.length; i++ ) {
+			for ( var i = this.coords.length; i--; ) {
 				this.coords[i] = v.coords[i];
 			}
 		} else {
@@ -75,7 +75,7 @@ NDee.Vector.prototype = {
 
 	fill: function ( val ) {
 
-		for ( var i = 0; i < this.coords.length; i++ ) {
+		for ( var i = this.coords.length; i--; ) {
 			this.coords[i] = val;
 		}
 		return this;
@@ -84,8 +84,8 @@ NDee.Vector.prototype = {
 
 	add: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			this.coords[i] += v.coords[i];
 		}
 
@@ -95,7 +95,7 @@ NDee.Vector.prototype = {
 
 	addScalar: function ( s ) {
 
-		for ( var i = 0; i < this.coords.length; i++ ) {
+		for ( var i = this.coords.length; i--; ) {
 			this.coords[i] += s;
 		}
 
@@ -105,8 +105,8 @@ NDee.Vector.prototype = {
 
 	sub: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			this.coords[i] -= v.coords[i];
 		}
 
@@ -116,8 +116,8 @@ NDee.Vector.prototype = {
 
 	multiply: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			this.coords[i] *= v.coords[i];
 		}
 
@@ -127,7 +127,7 @@ NDee.Vector.prototype = {
 
 	multiplyScalar: function ( s ) {
 
-		for ( var i = 0; i < this.coords.length; i++ ) {
+		for ( var i = this.coords.length; i--; ) {
 			this.coords[i] *= s;
 		}
 
@@ -137,8 +137,8 @@ NDee.Vector.prototype = {
 
 	divide: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			divider = v.coords[i];
 			this.coords[i] = divider === 0 ? (this.coords[i] / divider) : 0;
 		}
@@ -151,13 +151,13 @@ NDee.Vector.prototype = {
 
 		if ( s !== 0 ) {
 
-			for ( var i = 0; i < this.coords.length; i++ ) {
+			for ( var i = this.coords.length; i--; ) {
 				this.coords[i] /= s;
 			}
 
 		} else {
 
-			for ( var i = 0; i < this.coords.length; i++ ) {
+			for ( var i = this.coords.length; i--; ) {
 				this.coords[i] = 0;
 			}
 
@@ -169,10 +169,11 @@ NDee.Vector.prototype = {
 
 	min: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
-			if ( this.coords[i] > v.coords[i] ) {
-				this.coords[i] = v.coords[i];
+		var i = Math.min(this.coords.length, v.coords.length);
+		var buff;
+		while ( i-- ) {
+			if ( this.coords[i] > ( buff = v.coords[i] ) ) {
+				this.coords[i] = buff;
 			}
 		}
 
@@ -182,10 +183,11 @@ NDee.Vector.prototype = {
 
 	max: function ( v ) {
 
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
-			if ( this.coords[i] < v.coords[i] ) {
-				this.coords[i] = v.coords[i];
+		var i = Math.min(this.coords.length, v.coords.length);
+		var buff;
+		while ( i-- ) {
+			if ( this.coords[i] < ( buff = v.coords[i] ) ) {
+				this.coords[i] = buff;
 			}
 		}
 
@@ -195,12 +197,13 @@ NDee.Vector.prototype = {
 
 	clamp: function ( min, max ) {
 
-		var length = Math.min( this.coords.length, Math.min( min.coords.length, max.coords.length ) );
-		for ( var i = 0; i < length; i++ ) {
-			if ( this.coords[i] < min.coords[i] ) {
-				this.coords[i] = min.coords[i];
-			} else if ( this.coords[i] > max.coords[i] ) {
-				this.coords[i] = max.coords[i];
+		var i = Math.min( this.coords.length, Math.min( min.coords.length, max.coords.length ) );
+		var buffA, buffB;
+		while ( i-- ) {
+			if ( ( buffA = this.coords[i] ) < ( buffB = min.coords[i] ) ) {
+				this.coords[i] = buffB;
+			} else if ( buffA > ( buffB = max.coords[i] ) ) {
+				this.coords[i] = buffB;
 			}
 		}
 
@@ -210,15 +213,15 @@ NDee.Vector.prototype = {
 
 	negate: function() {
 
-		return this.multiplyScalar( - 1 );
+		return this.multiplyScalar( -1 );
 
 	},
 
 	dot: function ( v ) {
 
 		var result = 0;
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			result += this.coords[i] * v.coords[i];
 		}
 
@@ -272,8 +275,8 @@ NDee.Vector.prototype = {
 	distanceToSquared: function ( v ) {
 
 		var result = 0;
-		var length = Math.min(this.coords.length, v.coords.length);
-		for ( var i = 0; i < length; i++ ) {
+		var i = Math.min(this.coords.length, v.coords.length);
+		while ( i-- ) {
 			var value = this.coords[i] - v.coords[i];
 			result += value * value;
 		}
@@ -294,7 +297,7 @@ NDee.Vector.prototype = {
 			return false;
 		}
 
-		for ( var i = 0; i < this.coords.length; i++ ) {
+		for ( var i = this.coords.length; i--; ) {
 			if (this.coords[i] !== v.coords[i] ) {
 				return false;
 			}

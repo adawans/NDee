@@ -89,7 +89,7 @@ NDee.KDTree.prototype = {
 	remove: function ( item ) {
 
 		if ( this._config.collisionTest( this._aabb, item ) ) {
-			for ( var i = 0; i < this._items.length; i++ ) {
+			for ( var i = this._items.length; i--; ) {
 				if ( this._items[i] === item ) {
 					this._items.splice(i, 1);
 					this._cleanup();
@@ -97,7 +97,7 @@ NDee.KDTree.prototype = {
 				}
 			}
 
-			for ( var i = 0; i < this._children.length; i++ ) {
+			for ( var i = this._children.length; i--; ) {
 				if ( this._children[i].remove( item ) ) {
 					return true;
 				}
@@ -111,7 +111,7 @@ NDee.KDTree.prototype = {
 	move: function ( item, oldVersion ) {
 
 		if ( this._config.collisionTest( this._aabb, oldVersion ) ) {
-			for ( var i = 0; i < this._items.length; i++ ) {
+			for ( var i = this._items.length; i--; ) {
 				if ( this._items[i] === item ) {
 					if ( this._config.collisionTest( this._aabb, item ) ) {
 						return;
@@ -128,9 +128,11 @@ NDee.KDTree.prototype = {
 				}
 			}
 
-			for ( var i = 0; i < this._children.length; i++ ) {
-				if ( this._children[i].move( item, oldVersion ) ) {
-					return;
+			if ( this._children ) {
+				for ( var i = this._children.length; i--; ) {
+					if ( this._children[i].move( item, oldVersion ) ) {
+						return;
+					}
 				}
 			}
 		}
@@ -166,7 +168,7 @@ NDee.KDTree.prototype = {
 			}
 
 			if ( this._children ) {
-				for ( var i = 0; i < this._children.length; i++ ) {
+				for ( var i = this._children.length; i--; ) {
 					this._children[i].queryCollision( query );
 				}
 			}
@@ -181,7 +183,7 @@ NDee.KDTree.prototype = {
 		}
 
 		if ( this._aabb.distanceToPointSquared( query.point ) < ( query.maxDist * query.maxDist ) ) {
-			for ( var i = 0; i < this._items.length; i++ ) {
+			for ( var i = this._items.length; i--; ) {
 				var distance = query.distanceTo( this._items[i], query.maxDist );
 				if ( distance < query.maxDist ) {
 					query.nearest = this._items[i];

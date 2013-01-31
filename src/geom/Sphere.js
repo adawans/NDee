@@ -45,8 +45,10 @@ NDee.Sphere.prototype = {
 
 	containsPoint: function ( point ) {
 
-		for ( var i = 0; i < this.center.getN(); i++ ) {
-			if ( point.coords[i] < this.center.coords[i] - this.radius || point.coords[i] > this.center.coords[i] + this.radius ) {
+		var center = this.center.coords;
+		var buffA, buffB;
+		for ( var i = center.length; i--; ) {
+			if ( ( buffA = point.coords[i] ) < ( buffB = center[i] ) - this.radius || buffA > buffB + this.radius ) {
 				return false;
 			}
 		}
@@ -63,7 +65,7 @@ NDee.Sphere.prototype = {
 
 	intersectsSphere: function ( sphere ) {
 
-		for ( var i = 0; i < this.center.getN(); i++ ) {
+		for ( var i = this.center.coords.length; i--; ) {
 			if ( sphere.center.coords[i] + sphere.radius < this.center.coords[i] - this.radius || 
 				sphere.center.coords[i] - sphere.radius > this.center.coords[i] + this.radius ) {
 				return false;

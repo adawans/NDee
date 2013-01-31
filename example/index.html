@@ -35,7 +35,9 @@
 		<script src="../src/geom/Sphere.js"></script>
 		<script src="../src/index/KDTree.js"></script>
 
-		
+		<script src="js/PlaneGeometry.js"></script>
+
+
 
 		<script>
 
@@ -74,24 +76,21 @@
 				controls = new THREE.TrackballControls( camera );
 				
 				// renderer
-				renderer = new THREE.WebGLRenderer({ antialise: true, clearColor: 0x566666, clearAlpha: 1 });
+				renderer = new THREE.WebGLRenderer({ antialise: true, clearColor: 0x76BDDA, clearAlpha: 1 });
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				container.appendChild( renderer.domElement );
 
 				////////////////////////////////////// LIGHTS \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
 
-				var light = new THREE.SpotLight( 0xEEECCC, 0.5 );
-				light.position.set( 500, 1000, 2000 );
-				scene.add( light );
-
-				light = new THREE.SpotLight( 0xCCCDDD, 0.5 );
-				light.position.set( -200, -500, -200 );
-				scene.add( light );
-
-				light = new THREE.SpotLight( 0x00CCFF, 0.7 );
-				light.position.set( 200, -200, 200 );
-				scene.add( light );
+				 // add subtle ambient lighting
+		        var ambientLight = new THREE.AmbientLight(0xDDDDDE);
+		        scene.add(ambientLight);
+		 
+		        // add directional light source
+		        var directionalLight = new THREE.DirectionalLight(0xFFFEEE);
+		        directionalLight.position.set(1, 1, 0.5).normalize();
+		        scene.add(directionalLight);
 
 
 				initParticles( scene );

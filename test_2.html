@@ -13,7 +13,7 @@
 			//Initializing the octree
 			var config = {
 				"k": 3,
-				"maxCapacity": 50,
+				"maxCapacity": 20,
 				"collisionTest": function ( aabb, v ) {
 					return aabb.containsPoint( v );
 				},
@@ -34,14 +34,14 @@
 			var points = [];
 
 			console.time("BUILD");
-			for ( var i = 0; i < 100000; i++ ) {
+			for ( var i = 0; i < 1000; i++ ) {
 				var vect = new NDee.Vector( Math.random()*10, Math.random()*10, Math.random()*10 );
 				tree.add( vect );
 				points.push( vect );
 			}
 			console.timeEnd("BUILD");
 
-			var queryBounds = new NDee.AABB( new NDee.Vector( 2.5, 5, 6 ),  new NDee.Vector( 2.6, 5.2, 6.2 ) );
+			var queryBounds = new NDee.AABB( new NDee.Vector( 2, 5, 6 ),  new NDee.Vector( 4, 7, 8 ) );
 			var query = {
 				"collides": function ( aabb ) {
 					return aabb.isIntersectionAABB( queryBounds );

@@ -1,19 +1,18 @@
 var particles = [];
 var colliders = [];
 var tree = null;
-var model = null;
 
-function initParticles( scene ) {
+function initParticles() {
 
-	var sphere = new THREE.CubeGeometry ( 0.5, 0.5, 0.5 );		
+	var cube = new NDee.PlaneGeometry ( 0.5, 0.5, 0.5 );		
 	material = new THREE.MeshPhongMaterial( {color:0xEEFFFF, specular:0xFFFFFF , shininess: 0 ,perPixel: false} );
 
-	for (var i = 0; i < 1200; i++) {
-		var mesh = new THREE.Mesh( sphere, material );
+	for (var i = 0; i < 900; i++) {
+		var mesh = new THREE.Mesh( cube, material );
 
-		mesh.position.x = Math.random() * 100;
-		mesh.position.y = Math.random() * 100;
-		mesh.position.z = Math.random() * 100;
+		mesh.position.x = ( Math.random() - 0.5 ) * 100;
+		mesh.position.y = ( Math.random() - 0.5 ) * 100;
+		mesh.position.z = ( Math.random() - 0.5 ) * 100;
 
 		mesh.matrixAutoUpdate = false;
 		mesh.updateMatrix();
@@ -34,16 +33,15 @@ function initParticles( scene ) {
 					v.y >= aabb.min.coords[1] && v.y <= aabb.max.coords[1] &&
 					v.z >= aabb.min.coords[2] && v.z <= aabb.max.coords[2];
 		},
-		"medianBounds": new NDee.AABB( new NDee.Vector( 0, 0, 0 ),  new NDee.Vector( 0, 0, 0 ) ),
-		"medianVect": new NDee.Vector( 0, 0, 0 ),
+		"medianBounds": new NDee.AABB( new NDee.Vector( 3 ),  new NDee.Vector( 3 ) ),
+		"medianVect": new NDee.Vector( 3 ),
 		"getMedian": function ( items, dimension ) {
 			var bounds = this.medianBounds;
 			bounds.makeEmpty()
-			for ( var i = 0; i < items.length; i++ ) {
+			for ( var i = items.length; i--; ) {
 				this.medianVect.set(items[i].x, items[i].y, items[i].z);
 				bounds.expandByPoint( this.medianVect );
 			}
-
 			return bounds.min.coords[dimension] + ( ( bounds.max.coords[dimension] - bounds.min.coords[dimension] ) * 0.5 );
 		}
 	};
@@ -55,58 +53,66 @@ function initParticles( scene ) {
 }
 
 function onModelLoaded( geometry ) {
-	model = geometry;
-	for ( var i = 0; i < geometry.vertices.length; i++ ) {
+	for ( var i = geometry.vertices.length; i--; ) {
 		vert = geometry.vertices[i];
-		var vect = new THREE.Vector3( vert.x * 30 , vert.y * 30, vert.z * 30 );
+		var vect = new THREE.Vector3( vert.x , vert.y, vert.z ).multiplyScalar( 30 );
+		vect.isMesh = true;
 		tree.add( vect );
 		colliders.push(vect);
 	}
 
-	// originalMesh = new THREE.Mesh( geometry,  material  );
-	// originalMesh.scale.x = originalMesh.scale.y = originalMesh.scale.z = 15;
-	// scene.add( originalMesh );
+	for ( var i = particles.length; i--; ) {
+		tree.add( particles[i].mesh.position );
+	}
 }
 
 function updateParticles() {
 
 	var query = {
-		"bounds": new NDee.Sphere( new NDee.Vector( 0, 0, 0 ),  5 ),
-		"buffer": new NDee.Vector( 0, 0, 0 ),
+		"bounds": new NDee.AABB( new NDee.Vector( 3 ),  new NDee.Vector( 3 ) ),
+		"buffer": new NDee.Vector( 3 ),
 		"collides": function ( aabb ) {
-			return aabb.isIntersectionSphere( this.bounds );
+			return aabb.isIntersectionAABB( this.bounds );
 		},
 		"results": [],
 		"addResults": function(items) {
-			for ( var i = 0; i < items.length; i++ ) {
-				var outside = 	items[i].x < this.bounds.center.coords[0] - this.bounds.radius ||
-								items[i].x > this.bounds.center.coords[0] + this.bounds.radius ||
-								items[i].y < this.bounds.center.coords[1] - this.bounds.radius ||
-								items[i].y > this.bounds.center.coords[1] + this.bounds.radius ||
-								items[i].z < this.bounds.center.coords[2] - this.bounds.radius ||
-								items[i].z > this.bounds.center.coords[2] + this.bounds.radius;
+			var min = this.bounds.min.coords;
+			var max = this.bounds.max.coords;
+			var buff;
+			for ( var i = items.length; i--; ) {
+				var item = items[i];
+				var outside = 	item.x < min[0] ||
+								item.x > max[0] ||
+								item.y < min[1] ||
+								item.y > max[1] ||
+								item.z < min[2] ||
+								item.z > max[2];
 				if ( !outside ) {
-					this.results.push( items[i] );
+					this.results.push( item );
 				}
 			}
 		}
 	};
 	
-	for ( var i = 0; i < particles.length; i++ ) {
+	for ( var i = particles.length; i--; ) {
 		var pos = particles[i].mesh.position;
-		query.bounds.center.set( pos.x, pos.y, pos.z );
-		query.bounds.radius = Math.random() * 15;
+		var radius = Math.random() * 8;
+		query.bounds.min.set( pos.x - radius , pos.y - radius, pos.z - radius );
+		query.bounds.max.set( pos.x + radius , pos.y + radius, pos.z + radius );
 		query.results = [];
-		tree.queryCollision( query );
-		// for ( var j = 0; j < colliders.length; j++ ) {
-		// 	query.addResults( colliders[j] );
-		// }
+
+		if ( radius > 0.1 ) {
+			tree.queryCollision( query );
+			//query.addResults( colliders );
+		}
+			
 		updateParticle( particles[i], query.results );
 	}
 }
 
 function updateParticle( particle, neighbors ) {
-	var buffer = new THREE.Vector3( 0, 0, 0 );
+	var buffer = new THREE.Vector3( 3 );
+	var oldPos = new THREE.Vector3( 3 ).copy( particle.mesh.position );
 
 	var mesh = particle.mesh;
 	var position = particle.mesh.position;
@@ -119,39 +125,52 @@ function updateParticle( particle, neighbors ) {
 	var bestDirection = new THREE.Vector3( 0, 0, 0 );
 	var bestCos = Infinity;
 	var bestDist = 2;
+	var isMesh = false;
 	for ( var i = 0; i < neighbors.length; i++ ) {
-		buffer.copy( neighbors[i] );
-		buffer.sub( mesh.position, buffer );
+		if ( !isMesh || neighbors[i].isMesh ) {
+			buffer.copy( neighbors[i] );
+			buffer.sub( mesh.position, buffer );
 
-		var dot = buffer.dot( velocity );
-		if ( dot < 0 ) {
-			var cos = dot / buffer.length() / veloLength;
-			if ( cos < bestCos ) {
-				bestCos = cos;
-				bestDirection.copy( buffer );
+			var dot = buffer.dot( velocity );
+			if ( dot < 0.3 ) {
+				var cos = dot / buffer.length() / veloLength;
+				if ( cos < bestCos || ( neighbors[i].isMesh && !isMesh ) ) {
+					bestCos = cos;
+					bestDirection.copy( buffer );
+					isMesh = neighbors[i].isMesh;
+				}
 			}
 		}
 	}
 
-	if ( neighbors.length > 0 ) {
-		if ( mesh.scale.x < 1 )
-			mesh.scale.multiplyScalar( 1.0005 );
+	if ( isMesh ) {
+		if ( mesh.scale.x < 1.5 )
+			mesh.scale.multiplyScalar( 1.0009 );
 	} else {
-		if ( mesh.scale.x > 0.2 )
+		if ( mesh.scale.x > 0.4 )
 			mesh.scale.multiplyScalar( 0.9985 );
 	}
 
-	bestDirection.multiplyScalar(-0.2);
+	bestDirection.multiplyScalar( isMesh ? -0.2 : -0.1 );
 	velocity.add( bestDirection, velocity );
 
 	buffer.copy( velocity ).multiplyScalar( 0.02 );
 	mesh.position.add(buffer, mesh.position);
 
+
+
+	var matrix = new THREE.Matrix4();
+	matrix.extractRotation( mesh.matrix );
+	var direction = new THREE.Vector3( 0, 0, 1 );
+	matrix.multiplyVector3( direction );
+
 	buffer.copy(mesh.position);
 	buffer.add(velocity, buffer);
+	buffer.add(direction.multiplyScalar( 50 ), buffer);
 	mesh.lookAt(buffer);
 
 	velocity.setLength( veloLength );
 	mesh.updateMatrix();
 
+	tree.move( mesh.position, oldPos );
 }

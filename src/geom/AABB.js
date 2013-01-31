@@ -50,7 +50,7 @@ NDee.AABB.prototype = {
 
 	empty: function () {
 
-		for ( var i = 0; i < this.min.coords.length; i++ ) {
+		for ( var i = this.min.coords.length; i--; ) {
 			if ( this.min.coords[i] > this.max.coords[i] ) {
 				return true;
 			}
@@ -89,8 +89,9 @@ NDee.AABB.prototype = {
 
 	containsPoint: function ( point ) {
 
-		for ( var i = 0; i < this.min.coords.length; i++ ) {
-			if ( point.coords[i] < this.min.coords[i] || point.coords[i] > this.max.coords[i] ) {
+		var buff;
+		for ( var i = this.min.coords.length; i--; ) {
+			if ( ( buff = point.coords[i] ) < this.min.coords[i] || buff > this.max.coords[i] ) {
 				return false;
 			}
 		}
@@ -101,7 +102,7 @@ NDee.AABB.prototype = {
 
 	containsAABB: function ( aabb ) {
 
-		for ( var i = 0; i < this.min.coords.length; i++ ) {
+		for ( var i = this.min.coords.length; i--; ) {
 			if ( aabb.min.coords[i] < this.min.coords[i] || aabb.max.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
@@ -113,7 +114,7 @@ NDee.AABB.prototype = {
 
 	isIntersectionAABB: function ( aabb ) {
 
-		for ( var i = 0; i < this.min.coords.length; i++ ) {
+		for ( var i = this.min.coords.length; i--; ) {
 			if ( aabb.max.coords[i] < this.min.coords[i] || aabb.min.coords[i] > this.max.coords[i] ) {
 				return false;
 			}
@@ -124,10 +125,12 @@ NDee.AABB.prototype = {
 	},
 
 	isIntersectionSphere: function ( sphere ) {
-
-		for ( var i = 0; i < this.min.coords.length; i++ ) {
-			if ( sphere.center.coords[i] + sphere.radius < this.min.coords[i] || 
-				sphere.center.coords[i] - sphere.radius > this.max.coords[i] ) {
+		var radius = sphere.radius;
+		var sphere = sphere.center.coords;
+		var buff;
+		for ( var i = this.min.coords.length; i--; ) {
+			if ( ( buff = sphere[i] ) + radius < this.min.coords[i] || 
+				buff - sphere.radius > this.max.coords[i] ) {
 				return false;
 			}
 		}
@@ -150,6 +153,10 @@ NDee.AABB.prototype = {
 	},
 
 	distanceToPointSquared: function ( point ) {
+
+		if ( this.containsPoint( point ) ) {
+			return 0;
+		}
 
 		var buffer = NDee.AABB.__v1.copy( point );
 		return this.clampPoint( buffer ).sub( point ).lengthSq();
