@@ -2,12 +2,15 @@ var particles = [];
 var colliders = [];
 var tree = null;
 
+var materialModel = new THREE.MeshLambertMaterial( {color:0x76BDDA} );
+//materialModel.opacity = 0.2;
+
 function initParticles() {
 
 	var cube = new NDee.PlaneGeometry ( 0.5, 0.5, 0.5 );		
 	material = new THREE.MeshPhongMaterial( {color:0xEEFFFF, specular:0xFFFFFF , shininess: 0 ,perPixel: false} );
 
-	for (var i = 0; i < 900; i++) {
+	for (var i = 0; i < 800; i++) {
 		var mesh = new THREE.Mesh( cube, material );
 
 		mesh.position.x = ( Math.random() - 0.5 ) * 100;
@@ -21,7 +24,7 @@ function initParticles() {
 
 		var particle = {};
 		particle.mesh = mesh;
-		particle.velocity = new THREE.Vector3((Math.random()-1) * 10, (Math.random()-1) * 10, (Math.random()-1) * 10);
+		particle.velocity = new THREE.Vector3((Math.random()-1) * 8, (Math.random()-1) * 8, (Math.random()-1) * 8) ;
 		particles.push(particle);
 	}
 
@@ -55,7 +58,7 @@ function initParticles() {
 function onModelLoaded( geometry ) {
 	for ( var i = geometry.vertices.length; i--; ) {
 		vert = geometry.vertices[i];
-		var vect = new THREE.Vector3( vert.x , vert.y, vert.z ).multiplyScalar( 30 );
+		var vect = new THREE.Vector3( vert.x , vert.y, vert.z ).multiplyScalar( 25 );
 		vect.isMesh = true;
 		tree.add( vect );
 		colliders.push(vect);
@@ -64,6 +67,10 @@ function onModelLoaded( geometry ) {
 	for ( var i = particles.length; i--; ) {
 		tree.add( particles[i].mesh.position );
 	}
+
+	// var originalMesh = new THREE.Mesh( geometry,  materialModel  );
+	// originalMesh.scale.x = originalMesh.scale.y = originalMesh.scale.z = 23;
+	// scene.add( originalMesh );
 }
 
 function updateParticles() {
@@ -78,9 +85,9 @@ function updateParticles() {
 		"addResults": function(items) {
 			var min = this.bounds.min.coords;
 			var max = this.bounds.max.coords;
-			var buff;
+			var item;
 			for ( var i = items.length; i--; ) {
-				var item = items[i];
+				item = items[i];
 				var outside = 	item.x < min[0] ||
 								item.x > max[0] ||
 								item.y < min[1] ||
@@ -96,7 +103,7 @@ function updateParticles() {
 	
 	for ( var i = particles.length; i--; ) {
 		var pos = particles[i].mesh.position;
-		var radius = Math.random() * 8;
+		var radius = Math.random() * 7;
 		query.bounds.min.set( pos.x - radius , pos.y - radius, pos.z - radius );
 		query.bounds.max.set( pos.x + radius , pos.y + radius, pos.z + radius );
 		query.results = [];
@@ -144,20 +151,20 @@ function updateParticle( particle, neighbors ) {
 	}
 
 	if ( isMesh ) {
-		if ( mesh.scale.x < 1.5 )
+		if ( mesh.scale.x < 0.9 )
 			mesh.scale.multiplyScalar( 1.0009 );
 	} else {
 		if ( mesh.scale.x > 0.4 )
 			mesh.scale.multiplyScalar( 0.9985 );
 	}
 
-	bestDirection.multiplyScalar( isMesh ? -0.2 : -0.1 );
+	bestDirection.multiplyScalar( isMesh ? -0.1 : -0.1 );
 	velocity.add( bestDirection, velocity );
+
+	velocity.setLength( veloLength );
 
 	buffer.copy( velocity ).multiplyScalar( 0.02 );
 	mesh.position.add(buffer, mesh.position);
-
-
 
 	var matrix = new THREE.Matrix4();
 	matrix.extractRotation( mesh.matrix );
@@ -166,10 +173,9 @@ function updateParticle( particle, neighbors ) {
 
 	buffer.copy(mesh.position);
 	buffer.add(velocity, buffer);
-	buffer.add(direction.multiplyScalar( 50 ), buffer);
+	buffer.add(direction.multiplyScalar( 80 ), buffer);
 	mesh.lookAt(buffer);
 
-	velocity.setLength( veloLength );
 	mesh.updateMatrix();
 
 	tree.move( mesh.position, oldPos );

@@ -113,7 +113,7 @@ NDee.AABB.prototype = {
 	},
 
 	isIntersectionAABB: function ( aabb ) {
-
+		
 		for ( var i = this.min.coords.length; i--; ) {
 			if ( aabb.max.coords[i] < this.min.coords[i] || aabb.min.coords[i] > this.max.coords[i] ) {
 				return false;

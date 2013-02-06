@@ -128,11 +128,9 @@ NDee.KDTree.prototype = {
 				}
 			}
 
-			if ( this._children ) {
-				for ( var i = this._children.length; i--; ) {
-					if ( this._children[i].move( item, oldVersion ) ) {
-						return;
-					}
+			for ( var i = 0; this._children && i < this._children.length; i++ ) {
+				if ( this._children[i].move( item, oldVersion ) ) {
+					return;
 				}
 			}
 		}
@@ -158,6 +156,7 @@ NDee.KDTree.prototype = {
 		if ( this._items.length == 0 && this._parent ) {
 			this._parent._cleanup();
 		}
+		
 	},
 
 	queryCollision: function ( query ) {
